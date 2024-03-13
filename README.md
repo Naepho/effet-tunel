@@ -1,2 +1,2 @@
-# effet-tunel
-Projet de Physique 4
+# Effet tunnel : projet de physique 4
+L'énoncé est dans le dossier "docs".
