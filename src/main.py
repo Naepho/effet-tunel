@@ -4,30 +4,144 @@ from constants import ctes
 import numpy as np
 import matplotlib.pyplot as plt
 from timeit import default_timer as timer
+from scipy.interpolate import CubicSpline
 
 def main():
     case = 5
 
     if case == 5:
-        E = 0.5 * 1.6 * 10**(-19)
 
+        E_list = np.arange(0.1 * 1.6 * 10**(-19), 1.05 * 1.6 * 10**(-19), 0.05 * 10**(-19))
         a_list = np.arange(10**(-9), 10.5 * 10**(-9), 0.5 * 10**(-9))
         V_0_list = np.arange(0.1 * 1.6 * 10**(-19), 1.05 * 1.6 * 10**(-19), 0.05 * 10**(-19))
-        print(V_0_list)
+        n = 10
 
         a_len = len(a_list)
         V_0_len = len(V_0_list)
-        solutions = np.zeros((a_len, V_0_len))
+        E_len = len(E_list)
+        solutions = np.zeros((a_len, V_0_len, E_len))
+        counter = 0
+        counter_max = a_len * V_0_len * E_len
         for a_index in range(a_len):
             for V_0_index in range(V_0_len):
-                T, t = solve_problem(1, a_list[a_index], V_0_list[V_0_index], E)
-                solutions[a_index, V_0_index] = T
+                for E_index in range(E_len):
+                    T, t = solve_problem(n, a_list[a_index], V_0_list[V_0_index], E_list[E_index])
+                    solutions[a_index, V_0_index, E_index] = T
+                    counter += 1
+                    if counter % int(counter_max / 10) == 0:
+                        print("Advancement : " + str(np.round(counter/counter_max * 100)) + " %")
 
-        for i in range(len(solutions)):
-            plt.plot(V_0_list, solutions[i], '-.', label=str(np.round(a_list[i], 19)))
-        plt.plot([E, E], [0, 1], 'b')
-        plt.plot([V_0_list[0], V_0_list[-1]], [1, 1], 'black')
-        plt.legend()
+        ### Graphique de T en fonction de a
+
+        # V_0_index = 2
+        # E_index = E_len - 2
+        # sol_a = solutions[:, V_0_index, E_index]
+        # a_list_nm = mtnm(a_list)
+        # xs = np.arange(a_list_nm[0], a_list_nm[-1], a_list_nm[0] / 100)
+        # sol_a_interp = CubicSpline(a_list_nm, sol_a)
+        # plt.plot(a_list_nm, sol_a, 'r.', label="Valeur calculées")
+        # plt.plot(xs, sol_a_interp(xs), 'gray', linewidth = 0.5, label="Interpolation par splines")
+        # plt.xlabel("a [nm]", fontsize = 14)
+        # plt.ylabel("T(E)", fontsize = 14)
+        # plt.yscale('log')
+        # plt.title("T en fonction de a, pour V_0 = " + str(np.round(jtev(V_0_list[V_0_index]), 10)) + " [eV], E = " + str(np.round(jtev(E_list[E_index]), 10)) + " [eV] et n = " + str(n), fontsize = 15)
+        # plt.legend(fontsize = 14)
+        # plt.show()
+
+        ### Graphique de T en fonction de V_0
+
+        # fig, (ax1, ax2) = plt.subplots(1, 2)
+        # a_index = a_len - 2
+        # a = a_list[a_index]
+        # E_index = int(E_len / 2)
+        # E = E_list[E_index]
+        # sol_V_0 = solutions[a_index, :, E_index]
+
+        # V_0_list_1 = []
+        # sol_V_0_1 = []
+        # V_0_list_2 = []
+        # sol_V_0_2 = []
+        # for i in range(V_0_len):
+        #     if E > V_0_list[i]:
+        #         V_0_list_1.append(V_0_list[i])
+        #         sol_V_0_1.append(sol_V_0[i])
+        #     else:
+        #         V_0_list_2.append(V_0_list[i])
+        #         sol_V_0_2.append(sol_V_0[i])
+
+        # V_0_list_1 = jtev(np.array(V_0_list_1))
+        # V_0_list_2 = jtev(np.array(V_0_list_2))
+
+        # ax1.plot(V_0_list_1, sol_V_0_1, 'r.', label="E > V_0")
+        # ax2.plot(V_0_list_2, sol_V_0_2, 'r.', label="E < V_0")
+
+        # V_0_interp_1 = CubicSpline(V_0_list_1, sol_V_0_1)
+        # V_0_interp_2 = CubicSpline(V_0_list_2, sol_V_0_2)
+        # xs1 = np.arange(V_0_list_1[0], V_0_list_1[-1], V_0_list_1[0] / 100)
+        # xs2 = np.arange(V_0_list_2[0], V_0_list_2[-1], V_0_list_1[0] / 100)
+
+        # ax1.plot(xs1, V_0_interp_1(xs1), 'gray', linewidth = 0.5, label="Interpolation par splines")
+        # ax2.plot(xs2, V_0_interp_2(xs2), 'gray', linewidth = 0.5, label="Interpolation par splines")
+
+        # ax1.set_xlabel("V_0 [eV]", fontsize = 14)
+        # ax1.set_ylabel("T(E)", fontsize = 14)
+        # ax1.set_yscale('log')
+        # ax1.legend(fontsize = 14)
+
+        # ax2.set_xlabel("V_0 [eV]", fontsize = 14)
+        # ax2.set_ylabel("T(E)", fontsize = 14)
+        # ax2.set_yscale('log')
+        # fig.suptitle("T en fonction de V_0, pour a = " + str(np.round(mtnm(a), 7)) + " [nm], E = " + str(np.round(jtev(E), 10)) + " [eV] et n = " + str(n), fontsize = 15)
+        # ax2.legend(fontsize = 14)
+
+        # plt.show()
+
+        ### Graphique de T en fonction de E
+
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        a_index = a_len - 2
+        a = a_list[a_index]
+        V_0_index = int(V_0_len / 2)
+        V_0 = V_0_list[V_0_index]
+        sol_E = solutions[a_index, V_0_index, :]
+
+        E_list_1 = []
+        sol_E_1 = []
+        E_list_2 = []
+        sol_E_2 = []
+        for i in range(E_len):
+            if V_0 > E_list[i]:
+                E_list_1.append(E_list[i])
+                sol_E_1.append(sol_E[i])
+            else:
+                E_list_2.append(E_list[i])
+                sol_E_2.append(sol_E[i])
+
+        E_list_1 = jtev(np.array(E_list_1))
+        E_list_2 = jtev(np.array(E_list_2))
+
+        ax1.plot(E_list_1, sol_E_1, 'r.', label="E < V_0")
+        ax2.plot(E_list_2, sol_E_2, 'r.', label="E > V_0")
+
+        E_interp_1 = CubicSpline(E_list_1, sol_E_1)
+        E_interp_2 = CubicSpline(E_list_2, sol_E_2)
+        xs1 = np.arange(E_list_1[0], E_list_1[-1], E_list_1[0] / 100)
+        xs2 = np.arange(E_list_2[0], E_list_2[-1], E_list_1[0] / 100)
+
+        ax1.plot(xs1, E_interp_1(xs1), 'gray', linewidth = 0.5, label="Interpolation par splines")
+        ax2.plot(xs2, E_interp_2(xs2), 'gray', linewidth = 0.5, label="Interpolation par splines")
+
+        ax1.set_xlabel("E [eV]", fontsize = 14)
+        ax1.set_ylabel("T(E)", fontsize = 14)
+        ax1.set_yscale('log')
+        ax1.legend(fontsize = 14)
+
+        ax2.set_xlabel("E [eV]", fontsize = 14)
+        ax2.set_ylabel("T(E)", fontsize = 14)
+        ax2.set_yscale('log')
+        fig.suptitle("T en fonction de E, pour a = " + str(np.round(mtnm(a), 7)) + " [nm], V_0 = " + str(np.round(jtev(V_0), 10)) + " [eV] et n = " + str(n), fontsize = 15)
+        ax2.legend(fontsize = 14)
+
         plt.show()
 
     if case == 6:
@@ -44,10 +158,9 @@ def main():
             P.append(Pn(i, a, V_0, E, T101, t101))
             indices.append(i)
 
-            plt.plot(np.arange(1, 101, 1), P)
-            plt.show()
-
-            func = lambda n: Pn(n, a, V_0, E, T101, t101)
+        plt.plot(np.arange(1, 101, 1), P, 'purple', label="P(n)")
+        plt.legend()
+        plt.show()
 
         print("")
         print("Solution : " + str(indices[np.argmin(P)]))
@@ -87,6 +200,7 @@ def Pn(n, a, V_0, E, T101, t101):
 def solve_problem(n, a, V_0, E):
     start_time = timer()
     n = int(np.round(n))
+    counter = 0
 
     M_T = np.identity(2)
     f = lambda x: trig_barrier(ctes["x_a"], a, V_0, x)
@@ -157,6 +271,12 @@ def matrix(k, x):
 
 def T(M_T):
     return np.abs(M_T[0, 0] - ((M_T[0, 1] * M_T[1, 0]) / M_T[1,1]))**2
+
+def mtnm(m):
+    return m / 10**(-9)
+
+def jtev(j):
+    return j / (1.6 * 10**(-19))
 
 if __name__=="__main__":
     main()
