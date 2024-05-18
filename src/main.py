@@ -164,27 +164,162 @@ def main():
         # plt.show()
 
     if case == 6:
-        a = 2.5 * 10**(-9)
-        V_0 = 0.5 * 1.6 * 10**(-19)
-        E = 0.25 * 1.6 * 10**(-19)
+        # a = 2.5 * 10**(-9)
+        # V_0 = 0.5 * 1.6 * 10**(-19)
+        # E = 0.25 * 1.6 * 10**(-19)
 
-        T101, t101 = solve_problem(101, a, V_0, E)
+        # T101, t101 = solve_problem(101, a, V_0, E)
 
-        P = []
-        indices = []
-        for i in range(1, 101):
-            P.append(Pn(i, a, V_0, E, T101, t101))
-            indices.append(i)
+        # P = []
+        # indices = []
+        # for i in range(1, 101):
+        #     P.append(Pn(i, a, V_0, E, T101, t101))
+        #     indices.append(i)
 
-        print("Solution : " + str(indices[np.argmin(P)]))
+        # print("Solution : " + str(indices[np.argmin(P)]))
 
-        xs = np.arange(1, 100, 10**(-4))
-        interp = CubicSpline(np.arange(1, 101), P)
+        # # xs = np.arange(1, 100, 10**(-4))
+        # # interp = CubicSpline(np.arange(1, 101), P)
 
-        plt.plot(np.arange(1, 101, 1), P, 'r.', label="P(n)")
-        plt.plot(xs, interp(xs), 'gray', linewidth = 0.5, label="Interpolation par splines")
-        plt.legend()
+        # plt.plot(np.arange(1, 101, 1), P, 'r.', label="P(n)")
+        # plt.plot([1, 100], [np.min(P), np.min(P)], 'gray', linewidth = 0.5, label = "Minimum")
+        # # plt.plot(xs, interp(xs), 'gray', linewidth = 0.5, label="Interpolation par splines")
+        # plt.title("Évolution de P(n) avec n, pour a = " + str(mtnm(a)) + " [nm] , V_0 = " + str(jtev(V_0)) + " [eV], et E = " + str(jtev(E)) + " [eV]", fontsize = 16)
+        # plt.xlabel("n", fontsize = 15)
+        # plt.ylabel("P(n)", fontsize = 15)
+        # plt.legend(fontsize = 15)
+        # plt.show()
+
+        E_list = np.arange(0.1 * 1.6 * 10**(-19), 1.05 * 1.6 * 10**(-19), 0.05 * 10**(-19))
+        a_list = np.arange(10**(-9), 10.5 * 10**(-9), 0.5 * 10**(-9))
+        V_0_list = np.arange(0.1 * 1.6 * 10**(-19), 1.05 * 1.6 * 10**(-19), 0.05 * 10**(-19))
+
+        a_len = len(a_list)
+        V_0_len = len(V_0_list)
+        E_len = len(E_list)
+        solutions = np.zeros((a_len, V_0_len, E_len))
+
+        a_index_1 = int(a_len / 2)
+        E_index_1 = E_len - 2
+        a_index_2 = 2
+        E_index_2 = 2
+        V_0_index_1 = int(V_0_len / 2)
+        V_0_index_2 = V_0_len - 2
+
+        counter = 0
+        counter_max = a_len * V_0_len * E_len
+        for a_index in range(a_len):
+            for V_0_index in range(V_0_len):
+                for E_index in range(E_len):
+                    if (V_0_index != V_0_index_1 or a_index != a_index_1) and (V_0_index != V_0_index_2 or a_index != a_index_2):
+                        continue
+                    n = optimize_pn(a_list[a_index], E_list[E_index], V_0_list[V_0_index])
+                    solutions[a_index, V_0_index, E_index] = n
+                    counter += 1
+                    if counter % int(counter_max / 10) == 0:
+                        print("Advancement : " + str(np.round(counter/counter_max * 100)) + " %")
+
+        ### Graphique de opti en fonction de a
+
+        # fig, (ax1, ax2) = plt.subplots(1, 2)
+
+        # sol_a_1 = solutions[:, V_0_index_1, E_index_1]
+        # sol_a_2 = solutions[:, V_0_index_2, E_index_2]
+
+        # a_list_nm = mtnm(a_list)
+        # V_0_list_ev = jtev(V_0_list)
+        # E_list_ev = jtev(E_list)
+
+        # ax1.plot(a_list_nm, sol_a_1, 'r.', label="E > V_0")
+        # ax1.set_xlabel("a [nm]", fontsize = 15)
+        # ax1.set_ylabel("n optimal", fontsize = 15)
+        # ax1.set_title("n optimal en fonction de a, pour V_0 = " + str(np.round(jtev(V_0_list[V_0_index_1]), 10)) + " [eV], E = " + str(np.round(jtev(E_list[E_index_1]), 10)) + " [eV]", fontsize = 16)
+        # ax1.legend(fontsize = 15)
+
+        # ax2.plot(a_list_nm, sol_a_2, 'r.', label="E < V_0")
+        # ax2.set_xlabel("a [nm]", fontsize = 15)
+        # ax2.set_ylabel("n optimal", fontsize = 15)
+        # ax2.set_title("n optimal en fonction de a, pour V_0 = " + str(np.round(jtev(V_0_list[V_0_index_2]), 10)) + " [eV], E = " + str(np.round(jtev(E_list[E_index_2]), 10)) + " [eV]", fontsize = 16)
+        # ax2.legend(fontsize = 15)
+
+        # plt.show()
+
+        # Graphique en fonction de V_0
+
+        # fig, (ax1, ax2) = plt.subplots(1, 2)
+        # a_index = a_index_1
+        # E_index = E_index_1
+        # a = a_list[a_index]
+        # E = E_list[E_index]
+        # sol_V_0 = solutions[a_index, :, E_index]
+
+        # V_0_list_1 = []
+        # sol_V_0_1 = []
+        # V_0_list_2 = []
+        # sol_V_0_2 = []
+        # for i in range(V_0_len):
+        #     if E > V_0_list[i]:
+        #         V_0_list_1.append(V_0_list[i])
+        #         sol_V_0_1.append(sol_V_0[i])
+        #     else:
+        #         V_0_list_2.append(V_0_list[i])
+        #         sol_V_0_2.append(sol_V_0[i])
+
+        # V_0_list_1 = jtev(np.array(V_0_list_1))
+        # V_0_list_2 = jtev(np.array(V_0_list_2))
+
+        # ax1.plot(V_0_list_1, sol_V_0_1, 'r.', label="E > V_0")
+        # ax2.plot(V_0_list_2, sol_V_0_2, 'r.', label="E < V_0")
+
+        # ax1.set_xlabel("V_0 [eV]", fontsize = 15)
+        # ax1.set_ylabel("n optimal", fontsize = 15)
+        # ax1.legend(fontsize = 15)
+
+        # ax2.set_xlabel("V_0 [eV]", fontsize = 15)
+        # ax2.set_ylabel("n optimal", fontsize = 15)
+        # fig.suptitle("n optimal en fonction de V_0, pour a = " + str(np.round(mtnm(a), 7)) + " [nm], E = " + str(np.round(jtev(E), 10)) + " [eV]", fontsize = 16)
+        # ax2.legend(fontsize = 15)
+
+        # plt.show()
+
+        # Graphique en fonction de E
+
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+        a_index = a_index_1
+        a = a_list[a_index]
+        V_0_index = V_0_index_1
+        V_0 = V_0_list[V_0_index]
+        sol_E = solutions[a_index, V_0_index, :]
+
+        E_list_1 = []
+        sol_E_1 = []
+        E_list_2 = []
+        sol_E_2 = []
+        for i in range(E_len):
+            if V_0 > E_list[i]:
+                E_list_1.append(E_list[i])
+                sol_E_1.append(sol_E[i])
+            else:
+                E_list_2.append(E_list[i])
+                sol_E_2.append(sol_E[i])
+
+        E_list_1 = jtev(np.array(E_list_1))
+        E_list_2 = jtev(np.array(E_list_2))
+
+        ax1.plot(E_list_1, sol_E_1, 'r.', label="E < V_0")
+        ax2.plot(E_list_2, sol_E_2, 'r.', label="E > V_0")
+
+        ax1.set_xlabel("E [eV]", fontsize = 15)
+        ax1.set_ylabel("n optimal", fontsize = 15)
+        ax1.legend(fontsize = 15)
+
+        ax2.set_xlabel("E [eV]", fontsize = 15)
+        ax2.set_ylabel("n optimal", fontsize = 15)
+        fig.suptitle("n optimal en fonction de E, pour a = " + str(np.round(mtnm(a), 7)) + " [nm], V_0 = " + str(np.round(jtev(V_0), 10)) + " [eV]", fontsize = 16)
+        ax2.legend(fontsize = 15)
+
         plt.show()
+
 
     """
     # Tracer les rectangles et le triangle
@@ -210,6 +345,18 @@ def main():
     plt.grid(True)
     plt.show()
     """
+
+def optimize_pn(a, E, V_0):
+    T101, t101 = solve_problem(101, a, V_0, E)
+
+    P = []
+    indices = []
+    for i in range(1, 101):
+        P.append(Pn(i, a, V_0, E, T101, t101))
+        indices.append(i)
+
+    return indices[np.argmin(P)]
+
 
 def Pn(n, a, V_0, E, T101, t101):
     Tn, tn = solve_problem(n, a, V_0, E)
