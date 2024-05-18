@@ -7,7 +7,7 @@ from timeit import default_timer as timer
 from scipy.interpolate import CubicSpline
 
 def main():
-    case = 5
+    case = 6
 
     if case == 5:
 
@@ -33,20 +33,39 @@ def main():
 
         ### Graphique de T en fonction de a
 
-        # V_0_index = 2
-        # E_index = E_len - 2
-        # sol_a = solutions[:, V_0_index, E_index]
-        # a_list_nm = mtnm(a_list)
-        # xs = np.arange(a_list_nm[0], a_list_nm[-1], a_list_nm[0] / 100)
-        # sol_a_interp = CubicSpline(a_list_nm, sol_a)
-        # plt.plot(a_list_nm, sol_a, 'r.', label="Valeur calculées")
-        # plt.plot(xs, sol_a_interp(xs), 'gray', linewidth = 0.5, label="Interpolation par splines")
-        # plt.xlabel("a [nm]", fontsize = 14)
-        # plt.ylabel("T(E)", fontsize = 14)
-        # plt.yscale('log')
-        # plt.title("T en fonction de a, pour V_0 = " + str(np.round(jtev(V_0_list[V_0_index]), 10)) + " [eV], E = " + str(np.round(jtev(E_list[E_index]), 10)) + " [eV] et n = " + str(n), fontsize = 15)
-        # plt.legend(fontsize = 14)
-        # plt.show()
+        fig, (ax1, ax2) = plt.subplots(1, 2)
+
+        V_0_index_1 = 2
+        E_index_1 = E_len - 2
+        V_0_index_2 = V_0_len - 2
+        E_index_2 = 2
+
+        sol_a_1 = solutions[:, V_0_index_1, E_index_1]
+        sol_a_2 = solutions[:, V_0_index_2, E_index_2]
+
+        a_list_nm = mtnm(a_list)
+
+        xs = np.arange(a_list_nm[0], a_list_nm[-1], a_list_nm[0] / 100)
+        sol_a_interp_1 = CubicSpline(a_list_nm, sol_a_1)
+        sol_a_interp_2 = CubicSpline(a_list_nm, sol_a_2)
+
+        ax1.plot(a_list_nm, sol_a_1, 'r.', label="E > V_0")
+        ax1.plot(xs, sol_a_interp_1(xs), 'gray', linewidth = 0.5, label="Interpolation")
+        ax1.set_xlabel("a [nm]", fontsize = 15)
+        ax1.set_ylabel("T(E)", fontsize = 15)
+        ax1.set_yscale('log')
+        ax1.set_title("T en fonction de a, pour V_0 = " + str(np.round(jtev(V_0_list[V_0_index_1]), 10)) + " [eV], E = " + str(np.round(jtev(E_list[E_index_1]), 10)) + " [eV] et n = " + str(n), fontsize = 16)
+        ax1.legend(fontsize = 15)
+
+        ax2.plot(a_list_nm, sol_a_2, 'r.', label="E < V_0")
+        ax2.plot(xs, sol_a_interp_2(xs), 'gray', linewidth = 0.5, label="Interpolation")
+        ax2.set_xlabel("a [nm]", fontsize = 15)
+        ax2.set_ylabel("T(E)", fontsize = 15)
+        ax2.set_yscale('log')
+        ax2.set_title("T en fonction de a, pour V_0 = " + str(np.round(jtev(V_0_list[V_0_index_2]), 10)) + " [eV], E = " + str(np.round(jtev(E_list[E_index_2]), 10)) + " [eV] et n = " + str(n), fontsize = 16)
+        ax2.legend(fontsize = 15)
+
+        plt.show()
 
         ### Graphique de T en fonction de V_0
 
@@ -98,58 +117,57 @@ def main():
 
         ### Graphique de T en fonction de E
 
-        fig, (ax1, ax2) = plt.subplots(1, 2)
-        a_index = a_len - 2
-        a = a_list[a_index]
-        V_0_index = int(V_0_len / 2)
-        V_0 = V_0_list[V_0_index]
-        sol_E = solutions[a_index, V_0_index, :]
+        # fig, (ax1, ax2) = plt.subplots(1, 2)
+        # a_index = a_len - 2
+        # a = a_list[a_index]
+        # V_0_index = int(V_0_len / 2)
+        # V_0 = V_0_list[V_0_index]
+        # sol_E = solutions[a_index, V_0_index, :]
 
-        E_list_1 = []
-        sol_E_1 = []
-        E_list_2 = []
-        sol_E_2 = []
-        for i in range(E_len):
-            if V_0 > E_list[i]:
-                E_list_1.append(E_list[i])
-                sol_E_1.append(sol_E[i])
-            else:
-                E_list_2.append(E_list[i])
-                sol_E_2.append(sol_E[i])
+        # E_list_1 = []
+        # sol_E_1 = []
+        # E_list_2 = []
+        # sol_E_2 = []
+        # for i in range(E_len):
+        #     if V_0 > E_list[i]:
+        #         E_list_1.append(E_list[i])
+        #         sol_E_1.append(sol_E[i])
+        #     else:
+        #         E_list_2.append(E_list[i])
+        #         sol_E_2.append(sol_E[i])
 
-        E_list_1 = jtev(np.array(E_list_1))
-        E_list_2 = jtev(np.array(E_list_2))
+        # E_list_1 = jtev(np.array(E_list_1))
+        # E_list_2 = jtev(np.array(E_list_2))
 
-        ax1.plot(E_list_1, sol_E_1, 'r.', label="E < V_0")
-        ax2.plot(E_list_2, sol_E_2, 'r.', label="E > V_0")
+        # ax1.plot(E_list_1, sol_E_1, 'r.', label="E < V_0")
+        # ax2.plot(E_list_2, sol_E_2, 'r.', label="E > V_0")
 
-        E_interp_1 = CubicSpline(E_list_1, sol_E_1)
-        E_interp_2 = CubicSpline(E_list_2, sol_E_2)
-        xs1 = np.arange(E_list_1[0], E_list_1[-1], E_list_1[0] / 100)
-        xs2 = np.arange(E_list_2[0], E_list_2[-1], E_list_1[0] / 100)
+        # E_interp_1 = CubicSpline(E_list_1, sol_E_1)
+        # E_interp_2 = CubicSpline(E_list_2, sol_E_2)
+        # xs1 = np.arange(E_list_1[0], E_list_1[-1], E_list_1[0] / 100)
+        # xs2 = np.arange(E_list_2[0], E_list_2[-1], E_list_1[0] / 100)
 
-        ax1.plot(xs1, E_interp_1(xs1), 'gray', linewidth = 0.5, label="Interpolation par splines")
-        ax2.plot(xs2, E_interp_2(xs2), 'gray', linewidth = 0.5, label="Interpolation par splines")
+        # ax1.plot(xs1, E_interp_1(xs1), 'gray', linewidth = 0.5, label="Interpolation par splines")
+        # ax2.plot(xs2, E_interp_2(xs2), 'gray', linewidth = 0.5, label="Interpolation par splines")
 
-        ax1.set_xlabel("E [eV]", fontsize = 14)
-        ax1.set_ylabel("T(E)", fontsize = 14)
-        ax1.set_yscale('log')
-        ax1.legend(fontsize = 14)
+        # ax1.set_xlabel("E [eV]", fontsize = 14)
+        # ax1.set_ylabel("T(E)", fontsize = 14)
+        # ax1.set_yscale('log')
+        # ax1.legend(fontsize = 14)
 
-        ax2.set_xlabel("E [eV]", fontsize = 14)
-        ax2.set_ylabel("T(E)", fontsize = 14)
-        ax2.set_yscale('log')
-        fig.suptitle("T en fonction de E, pour a = " + str(np.round(mtnm(a), 7)) + " [nm], V_0 = " + str(np.round(jtev(V_0), 10)) + " [eV] et n = " + str(n), fontsize = 15)
-        ax2.legend(fontsize = 14)
+        # ax2.set_xlabel("E [eV]", fontsize = 14)
+        # ax2.set_ylabel("T(E)", fontsize = 14)
+        # ax2.set_yscale('log')
+        # fig.suptitle("T en fonction de E, pour a = " + str(np.round(mtnm(a), 7)) + " [nm], V_0 = " + str(np.round(jtev(V_0), 10)) + " [eV] et n = " + str(n), fontsize = 15)
+        # ax2.legend(fontsize = 14)
 
-        plt.show()
+        # plt.show()
 
     if case == 6:
         a = 2.5 * 10**(-9)
         V_0 = 0.5 * 1.6 * 10**(-19)
         E = 0.25 * 1.6 * 10**(-19)
 
-        T1, t1 = solve_problem(1, a, V_0, E)
         T101, t101 = solve_problem(101, a, V_0, E)
 
         P = []
@@ -158,12 +176,15 @@ def main():
             P.append(Pn(i, a, V_0, E, T101, t101))
             indices.append(i)
 
-        plt.plot(np.arange(1, 101, 1), P, 'purple', label="P(n)")
+        print("Solution : " + str(indices[np.argmin(P)]))
+
+        xs = np.arange(1, 100, 10**(-4))
+        interp = CubicSpline(np.arange(1, 101), P)
+
+        plt.plot(np.arange(1, 101, 1), P, 'r.', label="P(n)")
+        plt.plot(xs, interp(xs), 'gray', linewidth = 0.5, label="Interpolation par splines")
         plt.legend()
         plt.show()
-
-        print("")
-        print("Solution : " + str(indices[np.argmin(P)]))
 
     """
     # Tracer les rectangles et le triangle
